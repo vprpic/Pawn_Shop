@@ -10,10 +10,12 @@ public class playerInventoryManager : MonoBehaviour {
 
     public GameObject listedItem;                       //row prefab
     public GameObject scrollView;                       //parent of the instantiated rows
+    public InputField sfwInputField;                    //where the user inputs the 'where' for the sql query
 
     // Use this for initialization
     void Start () {
         instantiatedItemsList = new List<GameObject>();
+        //DBManager.ExecuteSQLCode("INSERT INTO playerInventory VALUES(null, 'Wooden Axe', 2, 5, 'Weapon')");
         itemList = DBManager.GetItemsFromTable("playerInventory");
         FillPlayerInventoryTable();
     }
@@ -53,5 +55,29 @@ public class playerInventoryManager : MonoBehaviour {
                 }
                 //Debug.Log("Item added");
             }
+    }
+
+    private void KillAllPlayerInventoryChildren()
+    {
+        foreach(GameObject row in instantiatedItemsList)
+        {
+            GameObject.Destroy(row);
+        }
+        instantiatedItemsList.Clear();
+        itemList.Clear();
+    }
+
+    public void OnUpdateTableButton()
+    {
+        KillAllPlayerInventoryChildren();
+        itemList = DBManager.GetItemsFromTable("playerInventory");
+        FillPlayerInventoryTable();
+    }
+
+    public void OnSFWEndEdit()
+    {
+        KillAllPlayerInventoryChildren();
+        itemList = DBManager.GetItemsFromTable("playerInventory", sfwInputField.text);
+        FillPlayerInventoryTable();
     }
 }

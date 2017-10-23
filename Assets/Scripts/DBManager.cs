@@ -12,15 +12,19 @@ public class DBManager {
     private static List<Item> itemList = new List<Item>();
     
     //connects to the DB database and returns the values from it
-    static public List<Item> GetItemsFromTable(string table)
+    static public List<Item> GetItemsFromTable(string table, string whereCode = "")
     {
+        string sqlQuery = ("SELECT * FROM " + table).ToString();
+        if (!whereCode.Equals(""))
+            sqlQuery = (sqlQuery + " WHERE " + whereCode).ToString();
+        Debug.Log(sqlQuery);
+
         //when 'using' ends it calls .dispose() which disposes of the connection
         using (IDbConnection dbConnection = new SqliteConnection(connectionString))
         {
             dbConnection.Open();
             using(IDbCommand dbCmd = dbConnection.CreateCommand())
             {
-                string sqlQuery = "SELECT * FROM " + table;
                 dbCmd.CommandText = sqlQuery;
 
                 using (IDataReader reader = dbCmd.ExecuteReader())
@@ -39,4 +43,16 @@ public class DBManager {
         return itemList;
     }
 
+    static public void ExecuteSQLCode(String code)
+    {
+        using (IDbConnection dbConnection = new SqliteConnection(connectionString))
+        {
+            dbConnection.Open();
+            using (IDbCommand dbCmd = dbConnection.CreateCommand())
+            {
+                dbCmd.CommandText = code;
+                dbConnection.Close();
+            }
+        }
+    }
 }
