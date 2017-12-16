@@ -5,18 +5,24 @@ using UnityEngine;
 public class Item  {
 
 	private int id;
+	private int idItem;
 	private string name;
 	private int buyPrice;
 	private int sellPrice;
 	private string type;
+	private string image;
+	private string description;
 
-	public Item(int newId, string newName, int newBuyPrice, int newSellPrice, string newType)
+	public Item(int newId, int newIdItem, string newName, int newBuyPrice, int newSellPrice, string newType, string newDescription, string newImage)
 	{
 		id = newId;
+		idItem = newIdItem;
 		name = newName;
 		buyPrice = newBuyPrice;
 		sellPrice = newSellPrice;
 		type = newType;
+		image = newImage;
+		description = newDescription;
 	}
 
 	public int Id
@@ -29,6 +35,19 @@ public class Item  {
 		set
 		{
 			id = value;
+		}
+	}
+
+	public int IdItem
+	{
+		get
+		{
+			return idItem;
+		}
+
+		set
+		{
+			idItem = value;
 		}
 	}
 
@@ -81,6 +100,32 @@ public class Item  {
 		set
 		{
 			type = value;
+		}
+	}
+
+	public string Image
+	{
+		get
+		{
+			return image;
+		}
+
+		set
+		{
+			image = value;
+		}
+	}
+
+	public string Description
+	{
+		get
+		{
+			return description;
+		}
+
+		set
+		{
+			description = value;
 		}
 	}
 }

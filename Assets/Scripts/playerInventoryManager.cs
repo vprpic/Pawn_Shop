@@ -9,15 +9,16 @@ public class PlayerInventoryManager : MonoBehaviour {
 	private List<GameObject> instantiatedItemsList;     //list of rows from the table
 	
 
-	public GameObject listedItem;						//row prefab
+	public GameObject listedItemPrefab;						//row prefab
 	public GameObject scrollView;						//parent of the instantiated rows
 	public InputField sfwInputField;					//where the user inputs the 'where' for the sql query
 
 	// Use this for initialization
-	void Start () {
+	public void Start () {
 		instantiatedItemsList = new List<GameObject>();
-		//DBManager.ExecuteSQLCode("INSERT INTO playerInventory VALUES(null, 'Wooden Axe', 2, 5, 'Weapon')");
-		itemList = DBManager.GetItemsFromTable("playerInventory");
+		DBManager.addTablesDictionary();
+		//DBManager.ExecuteSQLCode("INSERT INTO playerItems VALUES(null, 'Wooden Axe', 2, 5, 'Weapon')");
+		itemList = DBManager.GetItemsForUpdateTable();
 		FillPlayerInventoryTable();
 	}
 
@@ -30,27 +31,33 @@ public class PlayerInventoryManager : MonoBehaviour {
 		else
 			foreach (Item item in itemList)
 			{
-				instantiatedItemsList.Add((GameObject)Instantiate(listedItem, new Vector3(0, 0, 0), Quaternion.identity));
+				instantiatedItemsList.Add((GameObject)Instantiate(listedItemPrefab, new Vector3(0, 0, 0), Quaternion.identity));
 				instantiatedItemsList[instantiatedItemsList.Count - 1].transform.SetParent(scrollView.transform, false);
 				//Debug.Log("child number: " + instantiatedItemsList[instantiatedItemsList.Count - 1].transform.GetChild(0).childCount);
 
 				//set data from table into the newly created row
-				for(int i = 1; i < 5; i++)
+				for(int i = 1; i < 6; i++)
 				{
 					itemText = instantiatedItemsList[instantiatedItemsList.Count - 1].transform.GetChild(0).GetChild(i).GetComponent<Text>();
 					switch (i)
 					{
+						case 0:
+							//TODO: set image + for loop starts at 0
+							break;
 						case 1:
 							itemText.text = item.Id.ToString();
 							break;
 						case 2:
-							itemText.text = item.Name;
+							itemText.text = item.IdItem.ToString();
 							break;
 						case 3:
-							itemText.text = item.BuyPrice.ToString();
+							itemText.text = item.Name;
 							break;
 						case 4:
 							itemText.text = item.SellPrice.ToString();
+							break;
+						case 5:
+							itemText.text = item.Type;
 							break;
 					}
 				}
@@ -73,16 +80,50 @@ public class PlayerInventoryManager : MonoBehaviour {
 	public void OnUpdateTableButton()
 	{
 		KillAllPlayerInventoryChildren();
-		itemList = DBManager.GetItemsFromTable("playerInventory");
+		itemList = DBManager.GetItemsForUpdateTable();
 		FillPlayerInventoryTable();
 	}
 
-	//called when the player stops inputing in the 'whereInputField'
+	//called when the player presses enter or clicks out of the box in the 'whereInputField'
 	//runs the inputted sql query and returns the values
 	public void OnSFWEndEdit()
 	{
+		//TODOFIRST: test if this works
+		OnCheckButtonLevel1();
+		/*
+		string inputText = sfwInputField.text;
 		KillAllPlayerInventoryChildren();
-		itemList = DBManager.GetItemsFromTable("playerInventory", sfwInputField.text);
+		itemList = DBManager.Level1GetItemsFromTable(inputText);
+		FillPlayerInventoryTable();*/
+	}
+
+	public void OnCheckButtonLevel1()
+	{
+		string inputText = sfwInputField.text;
+		KillAllPlayerInventoryChildren();
+		itemList = DBManager.Level1GetItemsFromTable(inputText);
 		FillPlayerInventoryTable();
+		//test if the user input is correct
+		/*bool userInputTest = DBManager.TestUserInputedQueryAgainstRequestCode(CustomerManager.GetCurrentCustomer().Request.RowCount,inputText, CustomerManager.GetCurrentCustomer().Request.SqlCode);
+		if (userInputTest)
+		{
+
+		}
+		else
+		{
+
+		}*/
+		
+		
+		
+		//TODO: check if it's correct according to the request from the customer + the same in ONSWFEdit()
 	}
 }
+
+/* TODO: Define the structure for the levels
+ * TODO: enter the data into the tables
+ * TODOFIRST: sales
+ * TODO: purchasing
+ * TODO: questonnaires
+ * EXTRAIDEAS: finish this plz
+ */
