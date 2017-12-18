@@ -1,17 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class Customer {
 
 	private int id;
 	private string name;
 	private string catchphrase;
-	private string image;
+	private Sprite image;
 	private string buyingText;
 	private string failedPurchaseText;
 	private Request request;
 
-	public Customer(int newId, string newName, string newCatchphrase, string newImage, string newBuyingText, string newFailedPurchaseText)
+	public Customer(int newId, string newName, string newCatchphrase, Sprite newImage, string newBuyingText, string newFailedPurchaseText)
 	{
 		id = newId;
 		name = newName;
@@ -20,17 +21,7 @@ public class Customer {
 		buyingText = newBuyingText;
 		failedPurchaseText = newFailedPurchaseText;
 	}
-	public Customer(int newId, string newName, string newCatchphrase, string newImage, string newBuyingText, string newFailedPurchaseText, Request newRequest)
-	{
-		id = newId;
-		name = newName;
-		catchphrase = newCatchphrase;
-		image = newImage;
-		buyingText = newBuyingText;
-		failedPurchaseText = newFailedPurchaseText;
-		request = newRequest;
-	}
-
+	
 	public int Id
 	{
 		get
@@ -67,7 +58,7 @@ public class Customer {
 			catchphrase = value;
 		}
 	}
-	public string Image
+	public Sprite Image
 	{
 		get
 		{

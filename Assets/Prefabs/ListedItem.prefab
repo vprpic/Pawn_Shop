@@ -167,10 +167,10 @@ MonoBehaviour:
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
-    m_NormalColor: {r: 0.12941177, g: 0.12941177, b: 0.12941177, a: 1}
-    m_HighlightedColor: {r: 0.30882353, g: 0.30882353, b: 0.30882353, a: 1}
-    m_PressedColor: {r: 0.47794116, g: 0.48848397, b: 0.48848397, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_NormalColor: {r: 0.16078432, g: 0.09803922, b: 0.043137256, a: 1}
+    m_HighlightedColor: {r: 0.29411766, g: 0.20392157, b: 0.12941177, a: 1}
+    m_PressedColor: {r: 0.5294118, g: 0.4509804, b: 0.38431373, a: 1}
+    m_DisabledColor: {r: 0.6392157, g: 0.59607846, b: 0.56078434, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -498,7 +498,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1375655113411970}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 170.01501, y: -9.389999, z: 0}
+  m_LocalPosition: {x: 171.15001, y: -9.389999, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 224307437775366966}
@@ -583,10 +583,10 @@ RectTransform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 338.39, y: 18.78}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 0, y: -0}
+  m_SizeDelta: {x: 340.66, y: 18.78}
   m_Pivot: {x: 0, y: 1}
 --- !u!224 &224845425311159174
 RectTransform:

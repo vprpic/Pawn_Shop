@@ -88,41 +88,40 @@ public class PlayerInventoryManager : MonoBehaviour {
 	//runs the inputted sql query and returns the values
 	public void OnSFWEndEdit()
 	{
-		//TODOFIRST: test if this works
-		OnCheckButtonLevel1();
-		/*
-		string inputText = sfwInputField.text;
-		KillAllPlayerInventoryChildren();
-		itemList = DBManager.Level1GetItemsFromTable(inputText);
-		FillPlayerInventoryTable();*/
-	}
-
-	public void OnCheckButtonLevel1()
-	{
 		string inputText = sfwInputField.text;
 		KillAllPlayerInventoryChildren();
 		itemList = DBManager.Level1GetItemsFromTable(inputText);
 		FillPlayerInventoryTable();
-		//test if the user input is correct
-		/*bool userInputTest = DBManager.TestUserInputedQueryAgainstRequestCode(CustomerManager.GetCurrentCustomer().Request.RowCount,inputText, CustomerManager.GetCurrentCustomer().Request.SqlCode);
-		if (userInputTest)
-		{
+	}
 
+	public void OnCheckButtonLevel1()
+	{
+		if (CustomerManager.canTest)
+		{
+			string inputText = sfwInputField.text;
+			KillAllPlayerInventoryChildren();
+			itemList = DBManager.Level1GetItemsFromTable(inputText);
+			FillPlayerInventoryTable();
+			//test if the user input is correct
+			bool userInputTest = DBManager.TestUserInputedQueryAgainstRequestCode(CustomerManager.GetCurrentCustomer().Request.RowCount,inputText, CustomerManager.GetCurrentCustomer().Request.SqlCode);
+			Debug.Log("INPUT: "+userInputTest);
+			if (userInputTest) //if the player's answer was correct remove random item from table, increase coins by the price and replace the customer
+			{
+				int priceOfItem = DBManager.SelectAndRemoveRandomItemFromPlayerItems(inputText);
+				PlayScreenManager.IncreaseCoinCounter(priceOfItem);
+				StartCoroutine(PlayScreenManager.customerManager.CorrectAnswer());
+			}
+			else //if the player was wrong animate the customer, show the failed purchase text and replace the customer
+			{
+				StartCoroutine(PlayScreenManager.customerManager.WrongAnswer());
+			}
 		}
-		else
-		{
-
-		}*/
 		
-		
-		
-		//TODO: check if it's correct according to the request from the customer + the same in ONSWFEdit()
 	}
 }
 
 /* TODO: Define the structure for the levels
  * TODO: enter the data into the tables
- * TODOFIRST: sales
  * TODO: purchasing
  * TODO: questonnaires
  * EXTRAIDEAS: finish this plz

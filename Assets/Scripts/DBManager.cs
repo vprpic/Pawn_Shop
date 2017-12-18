@@ -67,6 +67,7 @@ public class DBManager {
 			using (IDbCommand dbCmd = dbConnection.CreateCommand())
 			{
 				dbCmd.CommandText = code;
+				dbCmd.ExecuteNonQuery();
 				dbConnection.Close();
 			}
 		}
@@ -106,7 +107,7 @@ public class DBManager {
 		return itemList;
 	}
 
-	public static void SelectRandomCustomer(out int id, out string name, out string catchphrase, out string image, out string buyingText, out string failedPurchaseText)
+	public static void SelectRandomCustomer(out int id, out string name, out string catchphrase, out Sprite image, out string buyingText, out string failedPurchaseText)
 	{
 		string sqlQuery = "select * from customers order by random() limit 1";
 		//Debug.Log(sqlQuery);
@@ -125,10 +126,10 @@ public class DBManager {
 					id = reader.GetInt32(0);
 					name = reader.GetString(1);
 					catchphrase = reader.GetString(2);
-					image = reader.GetString(3);
+					image = Resources.Load<Sprite>(reader.GetString(3));
 					buyingText = reader.GetString(4);
 					failedPurchaseText = reader.GetString(5);
-					//Debug.Log("Added customer: " + reader.GetString(1));
+					//Debug.Log("Added customer: " + reader.GetString(1) + "image: "+ reader.GetString(3));
 					
 					dbConnection.Close();
 					reader.Close();
@@ -158,7 +159,7 @@ public class DBManager {
 					sqlCode = reader.GetString(2);
 					rarity = reader.GetInt32(3);
 					//Debug.Log("Added request: " + reader.GetString(1));
-					
+
 					reader.Close();
 				}
 					//substring removes the "SELECT" part of the code
@@ -172,12 +173,13 @@ public class DBManager {
 					{
 						reader.Read();
 						rowCount = reader.GetInt32(0);
+						//Debug.Log("ROWCOUNT: " + rowCount);
 						//Debug.Log("Entered");
 
 						//test if the request has any items in the table but not every time, only if the random number is < 70
 						//so that the player doesn't run into empty tables too often
-						//EXTRAIDEAS: increase the number if you get too many tables with no items
-						if (rowCount<1 && (int)UnityEngine.Random.Range(1, 101) < 70)
+						//EXTRAIDEAS: increase the number if you get too many tables with no items ( && (int)UnityEngine.Random.Range(1, 101) < 70)
+						if (rowCount<1 && (int)UnityEngine.Random.Range(1, 101) < 90)
 							{
 								SelectRandomRequest(out id, out requestText, out sqlCode, out rarity, out rowCount);
 								//Debug.LogWarning("Request has 0 items in table, calling for it again");
@@ -193,7 +195,7 @@ public class DBManager {
 	//
 	public static bool TestUserInputedQueryAgainstRequestCode(int rowCount, string userCode, string sqlCode)
 	{
-		string sqlQuery = "SELECT count(*) FROM (" + sqlCode + " UNION " + userCode + ")";
+		string sqlQuery = "SELECT count(*) FROM ( " + sqlCode + " UNION SELECT p.id_player_item as id, i.id_item as id_item, i.name as name,i.price as buy_price, p.sell_price as sell_price, i.type as type, i.description as description, i.image as image FROM items as i JOIN playerItems as p ON i.id_item=p.id_item WHERE " + userCode + " )";
 		Debug.Log(sqlQuery);
 
 		//when 'using' ends it calls .dispose() which disposes of the connection
@@ -206,22 +208,69 @@ public class DBManager {
 
 				using (IDataReader reader = dbCmd.ExecuteReader())
 				{
+					reader.Read();
 					//if the number of rows in both of the tables (user input and answer) is the same the player answered correctly
 					//ofc if the tables just happen to have the same rows it will also register as correct
-					if (reader.GetInt32(0) == rowCount)
+					int num = reader.GetInt32(0);
+					reader.Close();
+					dbConnection.Close();
+					//Debug.Log("RowCount: " + rowCount + " num: " + num);
+					if (rowCount == num && rowCount != 0)
 					{
-						reader.Close();
-						dbConnection.Close();
 						return true;
 					}
 					else
 					{
-						reader.Close();
-						dbConnection.Close();
 						return false;
 					}
 				}
 			}
 		}
+	}
+
+	//used after the player has correctly answered the customer request
+	//returns the sellPrice which is used for reducing the number of coins
+	public static int SelectAndRemoveRandomItemFromPlayerItems(string inputText)
+	{
+		int sellPrice, idPlayerItem;
+		bool empty = false;
+		string sqlQuery = "SELECT p.id_player_item as id, i.id_item as id_item, i.name as name,i.price as buy_price, p.sell_price as sell_price, i.type as type, i.description as description, i.image as image FROM items as i JOIN playerItems as p ON i.id_item=p.id_item WHERE " + inputText + " ORDER BY random() LIMIT 1";
+		Debug.Log("delete rand: "+sqlQuery);
+
+		//when 'using' ends it calls .dispose() which disposes of the connection
+		using (IDbConnection dbConnection = new SqliteConnection(connectionString))
+		{
+			dbConnection.Open();
+			using (IDbCommand dbCmd = dbConnection.CreateCommand())
+			{
+				dbCmd.CommandText = sqlQuery;
+
+				using (IDataReader reader = dbCmd.ExecuteReader())
+				{
+					reader.Read();
+					try
+					{
+						idPlayerItem = reader.GetInt32(0);
+						sellPrice = reader.GetInt32(4);
+					}catch(Exception e)
+					{
+						empty = true;
+						idPlayerItem = 0;
+						sellPrice = 0;
+						Debug.LogWarning(e);
+					}
+
+					reader.Close();
+				}
+				if (!empty)
+				{
+					dbCmd.CommandText = "DELETE FROM playerItems WHERE id_player_item = " + idPlayerItem;
+					dbCmd.ExecuteNonQuery();
+					Debug.Log("DELETING: " + idPlayerItem);
+				}
+				dbConnection.Close();
+			}
+		}
+		return sellPrice;
 	}
 }
