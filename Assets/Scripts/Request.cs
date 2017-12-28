@@ -7,7 +7,6 @@ public class Request  {
 	private string requestText;
 	private string sqlCode;
 	private int rarity;
-	private int rowCount;
 
 	public Request(int newId, string newRequestText, string newSqlCode, int newRarity)
 	{
@@ -15,14 +14,6 @@ public class Request  {
 		requestText = newRequestText;
 		sqlCode = newSqlCode;
 		rarity = newRarity;
-	}
-	public Request(int newId, string newRequestText, string newSqlCode, int newRarity, int newRowCount)
-	{
-		id = newId;
-		requestText = newRequestText;
-		sqlCode = newSqlCode;
-		rarity = newRarity;
-		rowCount = newRowCount;
 	}
 	public int Id
 	{
@@ -70,18 +61,6 @@ public class Request  {
 		set
 		{
 			rarity = value;
-		}
-	}
-	public int RowCount
-	{
-		get
-		{
-			return rowCount;
-		}
-
-		set
-		{
-			rowCount = value;
 		}
 	}
 

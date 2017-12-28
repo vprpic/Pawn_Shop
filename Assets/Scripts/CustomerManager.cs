@@ -14,8 +14,9 @@ public class CustomerManager {
 	public Text writtenText;
 	public Animator animator;
 
-	private static List<Customer> customerList;		//a list of 5 customers to be recycled
+	private static List<Customer> customerList;     //a list of 5 customers to be recycled
 	private static int currentCustomerNumber;              //which customer is in front of the row
+	private static int previousCustomerNumber;
 	private Image currentCustomerImage;
 
 	public void Init()
@@ -26,6 +27,7 @@ public class CustomerManager {
 		customerName = GameObject.Find("NameText").GetComponent<Text>();
 		writtenText = GameObject.Find("WrittenText").GetComponent<Text>();
 		customerList = new List<Customer>();
+		previousCustomerNumber = 3;
 		currentCustomerNumber = 4;
 
 		customerList.Add(new Customer(1, "", "", null, "", ""));
@@ -77,10 +79,10 @@ public class CustomerManager {
 	{
 		canTest = false;
 
-		int id, rarity, rowCount;
+		int id, rarity;
 		string requestText, sqlCode;
-		DBManager.SelectRandomRequest(out id, out requestText, out sqlCode, out rarity, out rowCount);
-		Request request = new Request(id, requestText, sqlCode, rarity,rowCount);
+		DBManager.SelectRandomRequest(out id, out requestText, out sqlCode, out rarity);
+		Request request = new Request(id, requestText, sqlCode, rarity);
 		customer.Request = request;
 
 		canTest = true;
@@ -89,18 +91,32 @@ public class CustomerManager {
 	public IEnumerator CorrectAnswer()
 	{
 		//TODOFIRST: change text
+		dialogueManager.TypeTextStartCoroutine(writtenText, customerList[currentCustomerNumber].BuyingText,0.01f);
+		Debug.Log("customerList[currentCustomerNumber].name: " + customerList[currentCustomerNumber].Name);
+		Debug.Log("customerList[previousCustomerNumber].name: " + customerList[previousCustomerNumber].Name);
+		yield return new WaitForSeconds(customerList[currentCustomerNumber].BuyingText.Length * 0.05f);
 		dialogueManager.ExitTextBox();
 		dialogueManager.ExitCustomerImage();
+		PlayScreenManager.NumOfItemsInTable = DBManager.ReturnFirstInt("SELECT count(*) FROM playerItems");
 		yield return new WaitForSeconds(1);
-		SetupNextCustomer();
+		if(PlayScreenManager.NumOfItemsInTable > 7)
+		{
+			SetupNextCustomer();
+		}
+		else
+		{
+			//TODOFIRST: start the procurement phase
+			//ProcurementManager.ShowTheProcurementScreen();
+		}
 		yield return 0;
 	}
 
 	//set the values for the 5th customer in line and animate the customer image and text box into the screen 
 	private void SetupNextCustomer()
 	{
-		int previousCustomerNumber = currentCustomerNumber;
-		currentCustomerNumber = (currentCustomerNumber++) % 5;
+		previousCustomerNumber = currentCustomerNumber;
+		currentCustomerNumber = (currentCustomerNumber + 1) % 5;
+		
 		//Debug.Log("Customer: "+customerList[currentCustomerNumber].Name+" Image: " + customerList[currentCustomerNumber].Image);
 		//set the image of the next customer
 		currentCustomerImage.sprite = (Sprite) customerList[currentCustomerNumber].Image;
@@ -115,15 +131,25 @@ public class CustomerManager {
 		dialogueManager.EnterCustomerImage();
 		dialogueManager.EnterTextBox();
 
+		/*
+		Debug.Log("setUpNextCustomer: " + customerList[0].Request.SqlCode);
+		Debug.Log("setUpNextCustomer: " + customerList[1].Request.SqlCode);
+		Debug.Log("setUpNextCustomer: " + customerList[2].Request.SqlCode);
+		Debug.Log("setUpNextCustomer: " + customerList[3].Request.SqlCode);
+		Debug.Log("setUpNextCustomer: " + customerList[4].Request.SqlCode);*/
+		Debug.Log("current cust"+currentCustomerNumber+": " + customerList[currentCustomerNumber].Request.SqlCode);
+		Debug.Log("prev cust "+previousCustomerNumber+": " + customerList[previousCustomerNumber].Request.SqlCode);
 		dialogueManager.TypeTextStartCoroutine(writtenText, newCatchphrase, 0.01f, newRequest);
 	}
 	
-	//TODOFIRST: the price is not the same in the query and table!
-
-	//TODOFIRST: wrong answer
 	public IEnumerator WrongAnswer()
 	{
-		Debug.Log("Customer is sad :(");
+
+		Debug.Log("customerList[currentCustomerNumber].name: " + customerList[currentCustomerNumber].Name);
+		Debug.Log("customerList[previousCustomerNumber].name: " + customerList[previousCustomerNumber].Name);
+		dialogueManager.TypeTextStartCoroutine(writtenText, customerList[currentCustomerNumber].FailedPurchaseText, 0.01f);
+		yield return new WaitForSeconds(customerList[currentCustomerNumber].FailedPurchaseText.Length*0.05f);
+		//Debug.Log("Customer is sad :(");
 		dialogueManager.ExitTextBox();
 		dialogueManager.ExitCustomerImage();
 		yield return new WaitForSeconds(1);

@@ -30,25 +30,24 @@ public class DBManager {
 	//connects to the DB database and returns the values from the playerItems list for updating the table on screen
 	public static List<Item> GetItemsForUpdateTable()
 	{
-		string sqlQuery = "SELECT p.id_player_item as id, i.id_item as id_item, i.name as name,i.price as buy_price, p.sell_price as sell_price, i.type as type, i.description as description, i.image as image FROM items as i JOIN playerItems as p ON i.id_item=p.id_item";
-		//Debug.Log("GetItemsForUpdateTable");
-
-		//when 'using' ends it calls .dispose() which disposes of the connection
+		string sqlQuery = "SELECT p.id_player_item as id, i.id_item as id_item, i.name as name,i.price as buy_price," +
+			" p.sell_price as sell_price, i.type as type, i.description as description, i.image as image FROM items as i " +
+			"JOIN playerItems as p ON i.id_item=p.id_item";
+		
 		using (IDbConnection dbConnection = new SqliteConnection(connectionString))
 		{
 			dbConnection.Open();
 			using(IDbCommand dbCmd = dbConnection.CreateCommand())
 			{
 				dbCmd.CommandText = sqlQuery;
-
 				using (IDataReader reader = dbCmd.ExecuteReader())
 				{
 					while (reader.Read())
 					{
-						itemList.Add(new Item(reader.GetInt32(0), reader.GetInt32(1), reader.GetString(2), reader.GetInt32(3), reader.GetInt32(4), reader.GetString(5), reader.GetString(6), reader.GetString(7)));
+						itemList.Add(new Item(reader.GetInt32(0), reader.GetInt32(1), reader.GetString(2), reader.GetInt32(3), 
+							reader.GetInt32(4), reader.GetString(5), reader.GetString(6), reader.GetString(7)));
 						//Debug.Log("Added " + reader.GetString(2) + " to itemList");
 					}
-
 					dbConnection.Close();
 					reader.Close();
 				}
@@ -78,12 +77,13 @@ public class DBManager {
 	//TODO: if sqlite returns an error?
 	public static List<Item> Level1GetItemsFromTable(string whereCode = "")
 	{
-		string sqlQuery = ("SELECT p.id_player_item as id, i.id_item as id_item, i.name as name,i.price as buy_price, p.sell_price as sell_price, i.type as type, i.description as description, i.image as image FROM items as i JOIN playerItems as p ON i.id_item=p.id_item WHERE " + whereCode).ToString();
+		string sqlQuery = ("SELECT p.id_player_item as id, i.id_item as id_item, i.name as name,i.price as buy_price," +
+			" p.sell_price as sell_price, i.type as type, i.description as description, i.image as image FROM items as i " +
+			"JOIN playerItems as p ON i.id_item=p.id_item WHERE " + whereCode).ToString();
 		if (whereCode.Equals(""))
 			return GetItemsForUpdateTable();
 		//Debug.Log(sqlQuery);
-
-		//when 'using' ends it calls .dispose() which disposes of the connection
+		
 		using (IDbConnection dbConnection = new SqliteConnection(connectionString))
 		{
 			dbConnection.Open();
@@ -95,7 +95,8 @@ public class DBManager {
 				{
 					while (reader.Read())
 					{
-						itemList.Add(new Item(reader.GetInt32(0), reader.GetInt32(1), reader.GetString(2), reader.GetInt32(3), reader.GetInt32(4), reader.GetString(5), reader.GetString(6), reader.GetString(7)));
+						itemList.Add(new Item(reader.GetInt32(0), reader.GetInt32(1), reader.GetString(2), reader.GetInt32(3), 
+							reader.GetInt32(4), reader.GetString(5), reader.GetString(6), reader.GetString(7)));
 						//Debug.Log("Added " + reader.GetString(2) + " to itemList");
 					}
 
@@ -138,10 +139,10 @@ public class DBManager {
 		}
 	}
 
-	public static void SelectRandomRequest(out int id, out string requestText, out string sqlCode, out int rarity, out int rowCount)
+	public static void SelectRandomRequest(out int id, out string requestText, out string sqlCode, out int rarity)
 	{
 		string sqlQuery = "select cr.id_request as id,r.request as requestText,r.sql_code as sqlCode,cr.rarity as rarity from customers_requests as cr join requests as r on cr.id_request = r.id_request order by random() limit 1";
-		//Debug.Log(sqlQuery);
+		int rowCount;
 
 		//when 'using' ends it calls .dispose() which disposes of the connection
 		using (IDbConnection dbConnection = new SqliteConnection(connectionString))
@@ -161,42 +162,46 @@ public class DBManager {
 					//Debug.Log("Added request: " + reader.GetString(1));
 
 					reader.Close();
+
 				}
-					//substring removes the "SELECT" part of the code
-					//if the count of the rows in the table is less than 1 we call the function again to reset the request to something we need
-					string testCode ="SELECT count(*),"+sqlCode.Substring(6);
+				//substring removes the "SELECT" part of the code
+				//if the count of the rows in the table is less than 1 we call the function again to reset the request to something we need
+				string testCode = "SELECT count(*)," + sqlCode.Substring(6);
 
-					dbCmd.CommandText = testCode;
-					
+				dbCmd.CommandText = testCode;
 
-					using (IDataReader reader = dbCmd.ExecuteReader())
+
+				using (IDataReader reader = dbCmd.ExecuteReader())
+				{
+					reader.Read();
+					rowCount = reader.GetInt32(0);
+					//Debug.Log("ROWCOUNT: " + rowCount);
+					//Debug.Log("Entered");
+
+					//test if the request has any items in the table but not every time, only if the random number is < 70
+					//so that the player doesn't run into empty tables too often
+					//EXTRAIDEAS: increase the number if you get too many tables with no items ( && (int)UnityEngine.Random.Range(1, 101) < 70)
+					if (rowCount < 1 && (int)UnityEngine.Random.Range(1, 101) < 90)
 					{
-						reader.Read();
-						rowCount = reader.GetInt32(0);
-						//Debug.Log("ROWCOUNT: " + rowCount);
-						//Debug.Log("Entered");
-
-						//test if the request has any items in the table but not every time, only if the random number is < 70
-						//so that the player doesn't run into empty tables too often
-						//EXTRAIDEAS: increase the number if you get too many tables with no items ( && (int)UnityEngine.Random.Range(1, 101) < 70)
-						if (rowCount<1 && (int)UnityEngine.Random.Range(1, 101) < 90)
-							{
-								SelectRandomRequest(out id, out requestText, out sqlCode, out rarity, out rowCount);
-								//Debug.LogWarning("Request has 0 items in table, calling for it again");
-							}
-
-						reader.Close();
+						SelectRandomRequest(out id, out requestText, out sqlCode, out rarity);
+						//Debug.LogWarning("Request has 0 items in table, calling for it again");
 					}
-					dbConnection.Close();
+					reader.Close();
+				}
+					
+				dbConnection.Close();
 			}
 		}
 	}
 
-	//
-	public static bool TestUserInputedQueryAgainstRequestCode(int rowCount, string userCode, string sqlCode)
+	//count the number of rows from the real answer and from the user input answer
+	public static bool TestUserInputedQueryAgainstRequestCode(string userCode, string sqlCode)
 	{
+		//userCode = the where part from user input
+		//sqlCode = the 
 		string sqlQuery = "SELECT count(*) FROM ( " + sqlCode + " UNION SELECT p.id_player_item as id, i.id_item as id_item, i.name as name,i.price as buy_price, p.sell_price as sell_price, i.type as type, i.description as description, i.image as image FROM items as i JOIN playerItems as p ON i.id_item=p.id_item WHERE " + userCode + " )";
-		Debug.Log(sqlQuery);
+		Debug.Log("testUserInput: "+sqlQuery);
+		int rowCount;
 
 		//when 'using' ends it calls .dispose() which disposes of the connection
 		using (IDbConnection dbConnection = new SqliteConnection(connectionString))
@@ -204,6 +209,27 @@ public class DBManager {
 			dbConnection.Open();
 			using (IDbCommand dbCmd = dbConnection.CreateCommand())
 			{
+
+				/////////////////////////
+
+				//substring removes the "SELECT" part of the code
+				//to see how many items there are in the table
+				string testCode = "SELECT count(*)," + sqlCode.Substring(6);
+
+				dbCmd.CommandText = testCode;
+
+
+				using (IDataReader reader = dbCmd.ExecuteReader())
+				{
+					reader.Read();
+					rowCount = reader.GetInt32(0);
+					
+					reader.Close();
+				}
+
+				/////////////////////////
+
+
 				dbCmd.CommandText = sqlQuery;
 
 				using (IDataReader reader = dbCmd.ExecuteReader())
@@ -214,7 +240,7 @@ public class DBManager {
 					int num = reader.GetInt32(0);
 					reader.Close();
 					dbConnection.Close();
-					//Debug.Log("RowCount: " + rowCount + " num: " + num);
+					Debug.Log("RowCount: " + rowCount + " num: " + num);
 					if (rowCount == num && rowCount != 0)
 					{
 						return true;
@@ -224,6 +250,7 @@ public class DBManager {
 						return false;
 					}
 				}
+
 			}
 		}
 	}
@@ -234,17 +261,16 @@ public class DBManager {
 	{
 		int sellPrice, idPlayerItem;
 		bool empty = false;
-		string sqlQuery = "SELECT p.id_player_item as id, i.id_item as id_item, i.name as name,i.price as buy_price, p.sell_price as sell_price, i.type as type, i.description as description, i.image as image FROM items as i JOIN playerItems as p ON i.id_item=p.id_item WHERE " + inputText + " ORDER BY random() LIMIT 1";
-		Debug.Log("delete rand: "+sqlQuery);
+		string sqlQuery = "SELECT p.id_player_item as id, i.id_item as id_item, i.name as name,i.price as buy_price," +
+			" p.sell_price as sell_price, i.type as type, i.description as description, i.image as image FROM items as i" +
+			" JOIN playerItems as p ON i.id_item=p.id_item WHERE " + inputText + " ORDER BY random() LIMIT 1";
 
-		//when 'using' ends it calls .dispose() which disposes of the connection
 		using (IDbConnection dbConnection = new SqliteConnection(connectionString))
 		{
 			dbConnection.Open();
 			using (IDbCommand dbCmd = dbConnection.CreateCommand())
 			{
 				dbCmd.CommandText = sqlQuery;
-
 				using (IDataReader reader = dbCmd.ExecuteReader())
 				{
 					reader.Read();
@@ -259,7 +285,6 @@ public class DBManager {
 						sellPrice = 0;
 						Debug.LogWarning(e);
 					}
-
 					reader.Close();
 				}
 				if (!empty)
@@ -273,4 +298,31 @@ public class DBManager {
 		}
 		return sellPrice;
 	}
+
+	public static int ReturnFirstInt(string sqlCode) {
+		int numOfItems;
+
+		using (IDbConnection dbConnection = new SqliteConnection(connectionString))
+		{
+			dbConnection.Open();
+			using (IDbCommand dbCmd = dbConnection.CreateCommand())
+			{
+				
+				dbCmd.CommandText = sqlCode;
+
+				using (IDataReader reader = dbCmd.ExecuteReader())
+				{
+					reader.Read();
+					numOfItems = reader.GetInt32(0);
+					
+					reader.Close();
+				}
+
+				dbConnection.Close();
+			}
+		}
+		return numOfItems;
+	}
+
+
 }

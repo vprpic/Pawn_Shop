@@ -94,6 +94,8 @@ public class PlayerInventoryManager : MonoBehaviour {
 		FillPlayerInventoryTable();
 	}
 
+	//called when the player presses the check button while it's the first level
+	//
 	public void OnCheckButtonLevel1()
 	{
 		if (CustomerManager.canTest)
@@ -103,7 +105,9 @@ public class PlayerInventoryManager : MonoBehaviour {
 			itemList = DBManager.Level1GetItemsFromTable(inputText);
 			FillPlayerInventoryTable();
 			//test if the user input is correct
-			bool userInputTest = DBManager.TestUserInputedQueryAgainstRequestCode(CustomerManager.GetCurrentCustomer().Request.RowCount,inputText, CustomerManager.GetCurrentCustomer().Request.SqlCode);
+			//Debug.Log("is this the current customer? "+CustomerManager.GetCurrentCustomer().Name);
+			Debug.Log("real answer: "+CustomerManager.GetCurrentCustomer().Request.SqlCode);
+			bool userInputTest = DBManager.TestUserInputedQueryAgainstRequestCode(inputText, CustomerManager.GetCurrentCustomer().Request.SqlCode);
 			Debug.Log("INPUT: "+userInputTest);
 			if (userInputTest) //if the player's answer was correct remove random item from table, increase coins by the price and replace the customer
 			{
