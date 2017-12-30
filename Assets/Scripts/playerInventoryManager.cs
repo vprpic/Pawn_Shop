@@ -11,15 +11,27 @@ public class PlayerInventoryManager : MonoBehaviour {
 
 	public GameObject listedItemPrefab;						//row prefab
 	public GameObject scrollView;						//parent of the instantiated rows
-	public InputField sfwInputField;					//where the user inputs the 'where' for the sql query
+	public InputField sfwInputField;                    //where the user inputs the 'where' for the sql query
+	public Animator playerInventory;
 
-	// Use this for initialization
-	public void Start () {
+	public void EnterPlayerInventoryScreen()
+	{
+		playerInventory.SetBool("IsOpen", true);
+	}
+	public void ExitPlayerInventoryScreen()
+	{
+		StopAllCoroutines();
+		playerInventory.SetBool("IsOpen", false);
+	}
+
+	public void Start() {
 		instantiatedItemsList = new List<GameObject>();
 		DBManager.addTablesDictionary();
 		//DBManager.ExecuteSQLCode("INSERT INTO playerItems VALUES(null, 'Wooden Axe', 2, 5, 'Weapon')");
 		itemList = DBManager.GetItemsForUpdateTable();
 		FillPlayerInventoryTable();
+		//Debug.Log("Run insert into sales_log");
+		//TODO: DBManager.ExecuteSQLCode("INSERT INTO sales_log(id_item,entry_date,sell_price) VALUES(1, datetime('now'), 5)");
 	}
 
 	//instantiate and fill rows with data from itemList
@@ -117,10 +129,10 @@ public class PlayerInventoryManager : MonoBehaviour {
 			}
 			else //if the player was wrong animate the customer, show the failed purchase text and replace the customer
 			{
+				PlayScreenManager.DecreaseCoinCounter(1);
 				StartCoroutine(PlayScreenManager.customerManager.WrongAnswer());
 			}
 		}
-		
 	}
 }
 

@@ -42,8 +42,17 @@ public class CustomerManager {
 			GetRandomRequestForCustomer(customer);
 			//Debug.Log("customer1: " + customer.Name + ", request: " + customer.Request.RequestText);
 		}
-		
-		SetupNextCustomer();
+
+		//if we don't need to run the procurement send the next customer
+		if (!PlayScreenManager.DoWeNeedToRunProcurement())
+		{
+			SetupNextCustomer();
+		}
+		else
+		{
+			//TODO: remove playerInventory before running
+			Debug.Log("CustMan: we need to run procurement.");
+		}
 		//TODOFIRST: set canTest to true after the request has been displayed
 	}
 
@@ -90,23 +99,23 @@ public class CustomerManager {
 
 	public IEnumerator CorrectAnswer()
 	{
-		//TODOFIRST: change text
+		//TODOFIRST: EVERYTHING IS CORRECT!
 		dialogueManager.TypeTextStartCoroutine(writtenText, customerList[currentCustomerNumber].BuyingText,0.01f);
 		Debug.Log("customerList[currentCustomerNumber].name: " + customerList[currentCustomerNumber].Name);
 		Debug.Log("customerList[previousCustomerNumber].name: " + customerList[previousCustomerNumber].Name);
 		yield return new WaitForSeconds(customerList[currentCustomerNumber].BuyingText.Length * 0.05f);
 		dialogueManager.ExitTextBox();
 		dialogueManager.ExitCustomerImage();
-		PlayScreenManager.NumOfItemsInTable = DBManager.ReturnFirstInt("SELECT count(*) FROM playerItems");
 		yield return new WaitForSeconds(1);
-		if(PlayScreenManager.NumOfItemsInTable > 7)
+
+		//if we don't need to run the procurement send the next customer
+		if (!PlayScreenManager.DoWeNeedToRunProcurement())
 		{
 			SetupNextCustomer();
 		}
 		else
 		{
-			//TODOFIRST: start the procurement phase
-			//ProcurementManager.ShowTheProcurementScreen();
+			Debug.Log("CustMan: we need to run procurement.");
 		}
 		yield return 0;
 	}
@@ -145,8 +154,8 @@ public class CustomerManager {
 	public IEnumerator WrongAnswer()
 	{
 
-		Debug.Log("customerList[currentCustomerNumber].name: " + customerList[currentCustomerNumber].Name);
-		Debug.Log("customerList[previousCustomerNumber].name: " + customerList[previousCustomerNumber].Name);
+		//Debug.Log("customerList[currentCustomerNumber].name: " + customerList[currentCustomerNumber].Name);
+		//Debug.Log("customerList[previousCustomerNumber].name: " + customerList[previousCustomerNumber].Name);
 		dialogueManager.TypeTextStartCoroutine(writtenText, customerList[currentCustomerNumber].FailedPurchaseText, 0.01f);
 		yield return new WaitForSeconds(customerList[currentCustomerNumber].FailedPurchaseText.Length*0.05f);
 		//Debug.Log("Customer is sad :(");

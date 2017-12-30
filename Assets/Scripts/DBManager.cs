@@ -73,7 +73,7 @@ public class DBManager {
 	}
 
 	//Level 1 - there is a predefined select and from part
-	//connects to the DB database and returns the values from the playerItems list for updating the table on screen with the added where part from user input
+	//connects to the DB database and returns the values from the playerItems table for updating the table on screen with the added where part from user input
 	//TODO: if sqlite returns an error?
 	public static List<Item> Level1GetItemsFromTable(string whereCode = "")
 	{
@@ -98,6 +98,33 @@ public class DBManager {
 						itemList.Add(new Item(reader.GetInt32(0), reader.GetInt32(1), reader.GetString(2), reader.GetInt32(3), 
 							reader.GetInt32(4), reader.GetString(5), reader.GetString(6), reader.GetString(7)));
 						//Debug.Log("Added " + reader.GetString(2) + " to itemList");
+					}
+
+					dbConnection.Close();
+					reader.Close();
+				}
+			}
+		}
+		return itemList;
+	}
+
+	//connects to the DB database and returns the values from the items table for updating the procurement table in game
+	public static List<Item> ProcurementGetItemsFromTable()
+	{
+		string sqlQuery = "SELECT id_item, name, price AS buy_price, type FROM items";
+
+		using (IDbConnection dbConnection = new SqliteConnection(connectionString))
+		{
+			dbConnection.Open();
+			using (IDbCommand dbCmd = dbConnection.CreateCommand())
+			{
+				dbCmd.CommandText = sqlQuery;
+
+				using (IDataReader reader = dbCmd.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						itemList.Add(new Item(reader.GetInt32(0), reader.GetString(1), reader.GetInt32(3),reader.GetString(4)));
 					}
 
 					dbConnection.Close();
@@ -167,6 +194,7 @@ public class DBManager {
 				//substring removes the "SELECT" part of the code
 				//if the count of the rows in the table is less than 1 we call the function again to reset the request to something we need
 				string testCode = "SELECT count(*)," + sqlCode.Substring(6);
+				//Debug.Log("testCode: " + testCode);
 
 				dbCmd.CommandText = testCode;
 
@@ -199,9 +227,16 @@ public class DBManager {
 	{
 		//userCode = the where part from user input
 		//sqlCode = the 
-		string sqlQuery = "SELECT count(*) FROM ( " + sqlCode + " UNION SELECT p.id_player_item as id, i.id_item as id_item, i.name as name,i.price as buy_price, p.sell_price as sell_price, i.type as type, i.description as description, i.image as image FROM items as i JOIN playerItems as p ON i.id_item=p.id_item WHERE " + userCode + " )";
-		Debug.Log("testUserInput: "+sqlQuery);
-		int rowCount;
+		string wholeUserCode = "SELECT count(*), p.id_player_item as id," +
+			" i.id_item as id_item, i.name as name,i.price as buy_price, p.sell_price as sell_price, " +
+			"i.type as type, i.description as description, i.image as image FROM items as i JOIN playerItems as p" +
+			" ON i.id_item=p.id_item WHERE " + userCode;
+		string unionSqlQuery = "SELECT count(*) FROM ( " + sqlCode + " UNION SELECT p.id_player_item as id," +
+			" i.id_item as id_item, i.name as name,i.price as buy_price, p.sell_price as sell_price, " +
+			"i.type as type, i.description as description, i.image as image FROM items as i JOIN playerItems as p" +
+			" ON i.id_item=p.id_item WHERE " + userCode + " )";
+		Debug.Log("testUserInput: "+unionSqlQuery);
+		int realAnswerNum, userAnswerNum;
 
 		//when 'using' ends it calls .dispose() which disposes of the connection
 		using (IDbConnection dbConnection = new SqliteConnection(connectionString))
@@ -218,19 +253,30 @@ public class DBManager {
 
 				dbCmd.CommandText = testCode;
 
+				using (IDataReader reader = dbCmd.ExecuteReader())
+				{
+					reader.Read();
+					realAnswerNum = reader.GetInt32(0);
+
+					reader.Close();
+				}
+
+				/////////////////////////
+
+				dbCmd.CommandText = wholeUserCode;
 
 				using (IDataReader reader = dbCmd.ExecuteReader())
 				{
 					reader.Read();
-					rowCount = reader.GetInt32(0);
-					
+					userAnswerNum = reader.GetInt32(0);
+
 					reader.Close();
 				}
 
 				/////////////////////////
 
 
-				dbCmd.CommandText = sqlQuery;
+				dbCmd.CommandText = unionSqlQuery;
 
 				using (IDataReader reader = dbCmd.ExecuteReader())
 				{
@@ -240,8 +286,8 @@ public class DBManager {
 					int num = reader.GetInt32(0);
 					reader.Close();
 					dbConnection.Close();
-					Debug.Log("RowCount: " + rowCount + " num: " + num);
-					if (rowCount == num && rowCount != 0)
+					Debug.Log("RealAnswerNum: " + realAnswerNum + " num: " + num + "UserAnswerNum: " + userAnswerNum);
+					if (realAnswerNum == num && realAnswerNum != 0 && realAnswerNum == userAnswerNum)
 					{
 						return true;
 					}

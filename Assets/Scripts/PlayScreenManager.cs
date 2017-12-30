@@ -10,18 +10,24 @@ public class PlayScreenManager : MonoBehaviour
 
 	public static int coinCounter;
 	public static CustomerManager customerManager;
-
+	public static PlayerInventoryManager playerInventoryManager;
+	public static ProcurementManager procurementManager;
 	
-	public static int NumOfItemsInTable
+	//checks if the number of items in the table is less than 10, so that we can start the procurement
+	//return true if starting procurement
+	public static bool DoWeNeedToRunProcurement()
 	{
-		get
+		numOfItemsInTable = DBManager.ReturnFirstInt("SELECT count(*) FROM playerItems");
+		if(numOfItemsInTable < 10)
 		{
-			return numOfItemsInTable;
+			//start procurement
+			playerInventoryManager.ExitPlayerInventoryScreen();
+			procurementManager.RunProcurement();
+			return true;
 		}
-
-		set
+		else
 		{
-			numOfItemsInTable = value;
+			return false;
 		}
 	}
 
@@ -32,8 +38,11 @@ public class PlayScreenManager : MonoBehaviour
 		numOfItemsInTable = DBManager.ReturnFirstInt("SELECT count(*) FROM playerItems");
 		coinCountText = GameObject.Find("coinCountText").GetComponent<Text>();
 		customerManager = new CustomerManager();
+		playerInventoryManager = GameObject.FindObjectOfType<PlayerInventoryManager>();
+		procurementManager = GameObject.FindObjectOfType<ProcurementManager>();
 		coinCountText.text = coinCounter.ToString();
 		customerManager.Init();
+		playerInventoryManager.EnterPlayerInventoryScreen();
 	}
 
 	public static void IncreaseCoinCounter(int coinsToAdd)
@@ -44,6 +53,7 @@ public class PlayScreenManager : MonoBehaviour
 	}
 	public static void DecreaseCoinCounter(int coinsToRemove)
 	{
+		//TODO: if coinCount <= 0 end game
 		coinCounter -= coinsToRemove;
 		//remove coin animation
 		coinCountText.text = coinCounter.ToString();

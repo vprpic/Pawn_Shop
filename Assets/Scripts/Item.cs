@@ -25,6 +25,14 @@ public class Item  {
 		description = newDescription;
 	}
 
+	public Item(int newIdItem, string newName, int newBuyPrice, string newType)
+	{
+		idItem = newIdItem;
+		name = newName;
+		buyPrice = newBuyPrice;
+		type = newType;
+	}
+
 	public int Id
 	{
 		get
