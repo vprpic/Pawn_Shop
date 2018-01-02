@@ -10,6 +10,7 @@ public class DBManager {
 	private static Dictionary<string, Dictionary<string,string>> allTables = new Dictionary<string, Dictionary<string,string>>();
 	private static string connectionString = "URI=file:" + Application.dataPath + "/DB/DB.db";		//path to the database in the Assets
 	private static List<Item> itemList = new List<Item>();                                          //list of items in the table
+	private static List<Item> procurementItemList = new List<Item>();
 
 	//where we write all the names of the tables and of their attributes and their real names from the database
 	//to be used for translating user input from game tables to real tables
@@ -53,6 +54,7 @@ public class DBManager {
 				}
 			}
 		}
+		Debug.Log("num of rows: "+itemList.Count);
 		return itemList;
 	}
 
@@ -111,7 +113,7 @@ public class DBManager {
 	//connects to the DB database and returns the values from the items table for updating the procurement table in game
 	public static List<Item> ProcurementGetItemsFromTable()
 	{
-		string sqlQuery = "SELECT id_item, name, price AS buy_price, type FROM items";
+		string sqlQuery = "SELECT id_item, name, price, type, image FROM items";
 
 		using (IDbConnection dbConnection = new SqliteConnection(connectionString))
 		{
@@ -124,7 +126,7 @@ public class DBManager {
 				{
 					while (reader.Read())
 					{
-						itemList.Add(new Item(reader.GetInt32(0), reader.GetString(1), reader.GetInt32(3),reader.GetString(4)));
+						procurementItemList.Add(new Item(reader.GetInt32(0), reader.GetString(1), reader.GetInt32(2), reader.GetString(3), reader.GetString(4)));
 					}
 
 					dbConnection.Close();
@@ -132,7 +134,7 @@ public class DBManager {
 				}
 			}
 		}
-		return itemList;
+		return procurementItemList;
 	}
 
 	public static void SelectRandomCustomer(out int id, out string name, out string catchphrase, out Sprite image, out string buyingText, out string failedPurchaseText)
@@ -370,5 +372,26 @@ public class DBManager {
 		return numOfItems;
 	}
 
+	public static void AddItemsToPlayerItems(List<string> addItemsList)
+	{
+		string sqlCode;
+		using (IDbConnection dbConnection = new SqliteConnection(connectionString))
+		{
+			dbConnection.Open();
+			foreach (string itemIdBuyPrice in addItemsList)
+			{
+				sqlCode = "INSERT INTO playerItems VALUES (null, " + itemIdBuyPrice.Split(';')[0] + ", " + (int)(int.Parse(itemIdBuyPrice.Split(';')[1]) * 1.3 + 1) + ")";
+				Debug.Log(sqlCode);
+				
+				using (IDbCommand dbCmd = dbConnection.CreateCommand())
+				{
+					dbCmd.CommandText = sqlCode;
+					dbCmd.ExecuteNonQuery();
+					
+				}
+			}
+			dbConnection.Close();
+		}
+	}
 
 }

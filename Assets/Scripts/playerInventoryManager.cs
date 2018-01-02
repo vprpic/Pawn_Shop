@@ -29,6 +29,7 @@ public class PlayerInventoryManager : MonoBehaviour {
 		DBManager.addTablesDictionary();
 		//DBManager.ExecuteSQLCode("INSERT INTO playerItems VALUES(null, 'Wooden Axe', 2, 5, 'Weapon')");
 		itemList = DBManager.GetItemsForUpdateTable();
+		Debug.Log("numofrows itemlist: "+itemList.Count);
 		FillPlayerInventoryTable();
 		//Debug.Log("Run insert into sales_log");
 		//TODO: DBManager.ExecuteSQLCode("INSERT INTO sales_log(id_item,entry_date,sell_price) VALUES(1, datetime('now'), 5)");
@@ -43,6 +44,7 @@ public class PlayerInventoryManager : MonoBehaviour {
 		else
 			foreach (Item item in itemList)
 			{
+				//Debug.Log("Nname: " + item.Name);
 				instantiatedItemsList.Add((GameObject)Instantiate(listedItemPrefab, new Vector3(0, 0, 0), Quaternion.identity));
 				instantiatedItemsList[instantiatedItemsList.Count - 1].transform.SetParent(scrollView.transform, false);
 				//Debug.Log("child number: " + instantiatedItemsList[instantiatedItemsList.Count - 1].transform.GetChild(0).childCount);
@@ -64,6 +66,7 @@ public class PlayerInventoryManager : MonoBehaviour {
 							break;
 						case 3:
 							itemText.text = item.Name;
+							//Debug.Log("name: " + item.Name);
 							break;
 						case 4:
 							itemText.text = item.SellPrice.ToString();
@@ -136,9 +139,9 @@ public class PlayerInventoryManager : MonoBehaviour {
 	}
 }
 
-/* TODO: Define the structure for the levels
+/* TODOFIRST: coins reset each time
+ * TODO: Define the structure for the levels
  * TODO: enter the data into the tables
- * TODO: purchasing
  * TODO: questonnaires
  * EXTRAIDEAS: finish this plz
  */

@@ -12,23 +12,24 @@ public class PlayScreenManager : MonoBehaviour
 	public static CustomerManager customerManager;
 	public static PlayerInventoryManager playerInventoryManager;
 	public static ProcurementManager procurementManager;
-	
-	//checks if the number of items in the table is less than 10, so that we can start the procurement
-	//return true if starting procurement
-	public static bool DoWeNeedToRunProcurement()
+
+
+	public static void IncreaseCoinCounter(int coinsToAdd)
 	{
-		numOfItemsInTable = DBManager.ReturnFirstInt("SELECT count(*) FROM playerItems");
-		if(numOfItemsInTable < 10)
-		{
-			//start procurement
-			playerInventoryManager.ExitPlayerInventoryScreen();
-			procurementManager.RunProcurement();
-			return true;
-		}
-		else
+		coinCounter += coinsToAdd;
+		//add coin animation
+		coinCountText.text = coinCounter.ToString();
+	}
+	public static bool DecreaseCoinCounter(int coinsToRemove)
+	{
+		if (coinCounter - coinsToRemove < 0)
 		{
 			return false;
 		}
+		coinCounter -= coinsToRemove;
+		//remove coin animation
+		coinCountText.text = coinCounter.ToString();
+		return true;
 	}
 
 	// Use this for initialization
@@ -42,22 +43,33 @@ public class PlayScreenManager : MonoBehaviour
 		procurementManager = GameObject.FindObjectOfType<ProcurementManager>();
 		coinCountText.text = coinCounter.ToString();
 		customerManager.Init();
+		if (!DoWeNeedToRunProcurement())
+		{
+			playerInventoryManager.EnterPlayerInventoryScreen();
+		}
+	}
+
+	//checks if the number of items in the table is less than 10, so that we can start the procurement
+	//return true if starting procurement
+	public static bool DoWeNeedToRunProcurement()
+	{
+		numOfItemsInTable = DBManager.ReturnFirstInt("SELECT count(*) FROM playerItems");
+		if (numOfItemsInTable < 10)
+		{
+			//start procurement
+			playerInventoryManager.ExitPlayerInventoryScreen();
+			procurementManager.RunProcurement();
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	public static void ExitProcurementScreenEnterPlayerInventory()
+	{
 		playerInventoryManager.EnterPlayerInventoryScreen();
+		customerManager.SetupNextCustomer();
 	}
-
-	public static void IncreaseCoinCounter(int coinsToAdd)
-	{
-		coinCounter += coinsToAdd;
-		//add coin animation
-		coinCountText.text = coinCounter.ToString();
-	}
-	public static void DecreaseCoinCounter(int coinsToRemove)
-	{
-		//TODO: if coinCount <= 0 end game
-		coinCounter -= coinsToRemove;
-		//remove coin animation
-		coinCountText.text = coinCounter.ToString();
-	}
-
-
 }

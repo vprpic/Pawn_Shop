@@ -10,10 +10,12 @@ public class DialogueManager : MonoBehaviour {
 
 	public void EnterTextBox()
 	{
+		Debug.Log("Enter Text Box");
 		textBoxAnimator.SetBool("IsOpen", true);
 	}
 	public void ExitTextBox()
 	{
+		Debug.Log("Exit Text Box");
 		StopAllCoroutines();
 		textBoxAnimator.SetBool("IsOpen", false);
 	}
@@ -32,6 +34,7 @@ public class DialogueManager : MonoBehaviour {
 		StopAllCoroutines();
 		StartCoroutine(TypeText(writtenText, catchphrase, lettersPause, request));
 	}
+
 	private static IEnumerator TypeText(Text writtenText, string text1, float lettersPause, string text2 = "")
 	{
 		CustomerManager.canTest = false;

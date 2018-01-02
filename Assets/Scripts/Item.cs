@@ -25,12 +25,13 @@ public class Item  {
 		description = newDescription;
 	}
 
-	public Item(int newIdItem, string newName, int newBuyPrice, string newType)
+	public Item(int newIdItem, string newName, int newBuyPrice, string newType, string newImage)
 	{
 		idItem = newIdItem;
 		name = newName;
 		buyPrice = newBuyPrice;
 		type = newType;
+		image = newImage;
 	}
 
 	public int Id

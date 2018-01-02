@@ -50,7 +50,6 @@ public class CustomerManager {
 		}
 		else
 		{
-			//TODO: remove playerInventory before running
 			Debug.Log("CustMan: we need to run procurement.");
 		}
 		//TODOFIRST: set canTest to true after the request has been displayed
@@ -101,8 +100,8 @@ public class CustomerManager {
 	{
 		//TODOFIRST: EVERYTHING IS CORRECT!
 		dialogueManager.TypeTextStartCoroutine(writtenText, customerList[currentCustomerNumber].BuyingText,0.01f);
-		Debug.Log("customerList[currentCustomerNumber].name: " + customerList[currentCustomerNumber].Name);
-		Debug.Log("customerList[previousCustomerNumber].name: " + customerList[previousCustomerNumber].Name);
+		//Debug.Log("customerList[currentCustomerNumber].name: " + customerList[currentCustomerNumber].Name);
+		//Debug.Log("customerList[previousCustomerNumber].name: " + customerList[previousCustomerNumber].Name);
 		yield return new WaitForSeconds(customerList[currentCustomerNumber].BuyingText.Length * 0.05f);
 		dialogueManager.ExitTextBox();
 		dialogueManager.ExitCustomerImage();
@@ -121,7 +120,7 @@ public class CustomerManager {
 	}
 
 	//set the values for the 5th customer in line and animate the customer image and text box into the screen 
-	private void SetupNextCustomer()
+	public void SetupNextCustomer()
 	{
 		previousCustomerNumber = currentCustomerNumber;
 		currentCustomerNumber = (currentCustomerNumber + 1) % 5;
@@ -146,8 +145,6 @@ public class CustomerManager {
 		Debug.Log("setUpNextCustomer: " + customerList[2].Request.SqlCode);
 		Debug.Log("setUpNextCustomer: " + customerList[3].Request.SqlCode);
 		Debug.Log("setUpNextCustomer: " + customerList[4].Request.SqlCode);*/
-		Debug.Log("current cust"+currentCustomerNumber+": " + customerList[currentCustomerNumber].Request.SqlCode);
-		Debug.Log("prev cust "+previousCustomerNumber+": " + customerList[previousCustomerNumber].Request.SqlCode);
 		dialogueManager.TypeTextStartCoroutine(writtenText, newCatchphrase, 0.01f, newRequest);
 	}
 	
