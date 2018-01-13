@@ -10,16 +10,17 @@ public class Customer {
 	private Sprite image;
 	private string buyingText;
 	private string failedPurchaseText;
-	private Request request;
 
-	public Customer(int newId, string newName, string newCatchphrase, Sprite newImage, string newBuyingText, string newFailedPurchaseText)
+	private bool isRequest;
+	private Request request = null;
+	private Question question = null;
+
+	public Customer(int newId, string newName, string newCatchphrase, Sprite newImage)
 	{
 		id = newId;
 		name = newName;
 		catchphrase = newCatchphrase;
 		image = newImage;
-		buyingText = newBuyingText;
-		failedPurchaseText = newFailedPurchaseText;
 	}
 	
 	public int Id
@@ -94,6 +95,18 @@ public class Customer {
 			failedPurchaseText = value;
 		}
 	}
+	public bool IsRequest
+	{
+		get
+		{
+			return isRequest;
+		}
+
+		set
+		{
+			isRequest = value;
+		}
+	}
 	public Request Request
 	{
 		get
@@ -106,5 +119,16 @@ public class Customer {
 			request = value;
 		}
 	}
+	public Question Question
+	{
+		get
+		{
+			return question;
+		}
 
+		set
+		{
+			question = value;
+		}
+	}
 }

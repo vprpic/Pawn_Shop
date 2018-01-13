@@ -24,6 +24,7 @@ public class PlayerInventoryManager : MonoBehaviour {
 		playerInventory.SetBool("IsOpen", false);
 	}
 
+
 	public void Start() {
 		instantiatedItemsList = new List<GameObject>();
 		DBManager.addTablesDictionary();
@@ -121,9 +122,9 @@ public class PlayerInventoryManager : MonoBehaviour {
 			FillPlayerInventoryTable();
 			//test if the user input is correct
 			//Debug.Log("is this the current customer? "+CustomerManager.GetCurrentCustomer().Name);
-			Debug.Log("real answer: "+CustomerManager.GetCurrentCustomer().Request.SqlCode);
+			//Debug.Log("real answer: "+CustomerManager.GetCurrentCustomer().Request.SqlCode);
 			bool userInputTest = DBManager.TestUserInputedQueryAgainstRequestCode(inputText, CustomerManager.GetCurrentCustomer().Request.SqlCode);
-			Debug.Log("INPUT: "+userInputTest);
+			//Debug.Log("INPUT: "+userInputTest);
 			if (userInputTest) //if the player's answer was correct remove random item from table, increase coins by the price and replace the customer
 			{
 				int priceOfItem = DBManager.SelectAndRemoveRandomItemFromPlayerItems(inputText);

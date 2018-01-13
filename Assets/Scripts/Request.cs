@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class Request  {
 
 	private int id;
-	private string requestText;
+	private string requestText = null;
 	private string sqlCode;
 	private int rarity;
 

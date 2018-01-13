@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class PlayScreenManager : MonoBehaviour
@@ -71,5 +72,34 @@ public class PlayScreenManager : MonoBehaviour
 	{
 		playerInventoryManager.EnterPlayerInventoryScreen();
 		customerManager.SetupNextCustomer();
+	}
+
+	public static void ExitPlayerInventory()
+	{
+		playerInventoryManager.ExitPlayerInventoryScreen();
+	}
+	public static void EnterPlayerInventory()
+	{
+		playerInventoryManager.EnterPlayerInventoryScreen();
+	}
+
+	public void AnswerButtonPressed()
+	{
+
+		string answeredText = EventSystem.current.currentSelectedGameObject.transform.GetChild(0).GetComponent<Text>().text;
+		
+		Debug.Log(" AnswerText: " + answeredText);
+
+		if (answeredText == CustomerManager.GetCurrentCustomer().Question.CorrectAnswer)
+		{
+			Debug.Log("correct answer");
+			PlayScreenManager.IncreaseCoinCounter(2);
+		}
+		else
+		{
+			Debug.Log("incorrect answer");
+			PlayScreenManager.DecreaseCoinCounter(2);
+		}
+		StartCoroutine(customerManager.Answer());
 	}
 }

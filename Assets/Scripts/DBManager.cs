@@ -288,7 +288,7 @@ public class DBManager {
 					int num = reader.GetInt32(0);
 					reader.Close();
 					dbConnection.Close();
-					Debug.Log("RealAnswerNum: " + realAnswerNum + " num: " + num + "UserAnswerNum: " + userAnswerNum);
+					//Debug.Log("RealAnswerNum: " + realAnswerNum + " num: " + num + "UserAnswerNum: " + userAnswerNum);
 					if (realAnswerNum == num && realAnswerNum != 0 && realAnswerNum == userAnswerNum)
 					{
 						return true;
@@ -394,4 +394,71 @@ public class DBManager {
 		}
 	}
 
+	public static void SelectRandomQuestion(int id_customer, out int id_question, out string questionText, out int correctAnswerId, out int rarity)
+	{
+		string sqlQuery = "SELECT q.id_question, question, correct_answer, rarity FROM questions q JOIN customers_questions cq ON q.id_question = cq.id_question WHERE cq.id_customer = " + id_customer + " order by random() limit 1";
+
+		//when 'using' ends it calls .dispose() which disposes of the connection
+		using (IDbConnection dbConnection = new SqliteConnection(connectionString))
+		{
+			dbConnection.Open();
+			using (IDbCommand dbCmd = dbConnection.CreateCommand())
+			{
+				dbCmd.CommandText = sqlQuery;
+
+				using (IDataReader reader = dbCmd.ExecuteReader())
+				{
+					reader.Read();
+					id_question = reader.GetInt32(0);
+					questionText = reader.GetString(1);
+					correctAnswerId = reader.GetInt32(2);
+					rarity = reader.GetInt32(3);
+					//Debug.Log("Added request: " + reader.GetString(1));
+
+					reader.Close();
+
+				}
+
+				dbConnection.Close();
+			}
+		}
+	}
+
+	//returns the text of the correct answer and a list of 3 incorrect answers
+	public static List<string> GetWrongAnswersForQuestion(int id_question, int id_correct_answer, out string correctAnswer, int rowCount = 3)
+	{
+		List<string> wrongAnswers = new List<string>();
+		string sqlQuery = "SELECT ca.text as correct_answer, wa.text as wrong_answer FROM " +
+			"(SELECT text FROM answers WHERE id_answer = " + id_correct_answer + ") ca JOIN " +
+			"(SELECT text FROM answers a JOIN answers_questions aq ON a.id_answer = aq.id_answer " +
+			"WHERE aq.id_question = " + id_question + " order by random() limit " + rowCount + ") wa ";
+		Debug.Log(sqlQuery);
+		string correctAnswer_ = null;
+
+		//when 'using' ends it calls .dispose() which disposes of the connection
+		using (IDbConnection dbConnection = new SqliteConnection(connectionString))
+		{
+			dbConnection.Open();
+			using (IDbCommand dbCmd = dbConnection.CreateCommand())
+			{
+				dbCmd.CommandText = sqlQuery;
+
+				using (IDataReader reader = dbCmd.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						correctAnswer_ = reader.GetString(0);
+						//Debug.Log("correct: " + correctAnswer_ + " wrong: " + reader.GetString(1));
+						wrongAnswers.Add(reader.GetString(1));
+					}
+					correctAnswer = correctAnswer_;
+
+					dbConnection.Close();
+					reader.Close();
+
+					return wrongAnswers;
+				}
+			}
+		}
+	}
 }

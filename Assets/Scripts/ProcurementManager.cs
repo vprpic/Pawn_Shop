@@ -53,7 +53,6 @@ public class ProcurementManager : MonoBehaviour {
 
 		if(DBManager.ReturnFirstInt("SELECT count(*) FROM playerItems") >= 10)
 		{
-			//TODOFIRST: add all the bought items to the playerItems table with the sell_price as (int) buy_price*1.3
 			ExitProcurementManagerScreen();
 			//TODO: exit merchant
 			PlayScreenManager.ExitProcurementScreenEnterPlayerInventory();
