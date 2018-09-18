@@ -18,6 +18,8 @@ public class PlayScreenManager : MonoBehaviour
 	public static void IncreaseCoinCounter(int coinsToAdd)
 	{
 		coinCounter += coinsToAdd;
+		PlayerPrefs.SetInt("CoinSavings", coinCounter);
+		PlayerPrefs.Save();
 		//add coin animation
 		coinCountText.text = coinCounter.ToString();
 	}
@@ -28,6 +30,8 @@ public class PlayScreenManager : MonoBehaviour
 			return false;
 		}
 		coinCounter -= coinsToRemove;
+		PlayerPrefs.SetInt("CoinSavings", coinCounter);
+		PlayerPrefs.Save();
 		//remove coin animation
 		coinCountText.text = coinCounter.ToString();
 		return true;
@@ -36,7 +40,14 @@ public class PlayScreenManager : MonoBehaviour
 	// Use this for initialization
 	void Start()
 	{
-		coinCounter = 30;
+		if (PlayerPrefs.GetInt("CoinSavings") <= 0)
+		{
+			coinCounter = 1;
+		}
+		else
+		{
+			coinCounter = PlayerPrefs.GetInt("CoinSavings");
+		}
 		numOfItemsInTable = DBManager.ReturnFirstInt("SELECT count(*) FROM playerItems");
 		coinCountText = GameObject.Find("coinCountText").GetComponent<Text>();
 		customerManager = new CustomerManager();
